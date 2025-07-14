@@ -13,9 +13,9 @@ pipeline {
             }
         }
 
-        stage('Install & Run Tests in Order') {
+        stage('Install & Run Tests') {
             steps {
-                echo '🐍 Установка зависимостей и запуск тестов по порядку'
+                echo '🐍 Установка зависимостей и запуск всех тестов'
                 sh '''
                     python3 -m venv .venv
                     . .venv/bin/activate
@@ -25,12 +25,8 @@ pipeline {
                     echo '🧹 Очистка прошлых результатов Allure'
                     rm -rf allure-results
 
-                    echo '🚀 Запуск тестов в заданном порядке'
-                    pytest --alluredir=allure-results \
-                      tests/test_authorization_flow.py \
-                      tests/test_get_clubs_list.py \
-                      tests/test_get_club_details_guid.py \
-                      tests/test_get_club_not_found.py
+                    echo '🚀 Запуск всех тестов'
+                    pytest tests/ --alluredir=allure-results --disable-warnings --maxfail=1 -v
                 '''
             }
         }

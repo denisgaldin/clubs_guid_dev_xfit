@@ -21,11 +21,16 @@ pipeline {
                     . .venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
+
+                    echo '🧹 Очистка прошлых результатов Allure'
                     rm -rf allure-results
-                    pytest --alluredir=allure-results tests/test_authorization_flow.py
-                    pytest --alluredir=allure-results tests/test_get_clubs_list.py
-                    pytest --alluredir=allure-results tests/test_get_club_details_guid.py
-                    pytest --alluredir=allure-results tests/test_get_club_not_found.py
+
+                    echo '🚀 Запуск тестов в заданном порядке'
+                    pytest --alluredir=allure-results \
+                      tests/test_authorization_flow.py \
+                      tests/test_get_clubs_list.py \
+                      tests/test_get_club_details_guid.py \
+                      tests/test_get_club_not_found.py
                 '''
             }
         }

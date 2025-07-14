@@ -14,6 +14,7 @@ HEADERS_CLUBS_LIST = {
     "Cache-Control": "no-cache",
 }
 
+
 def test_get_clubs_list(access_token):
     assert access_token, "access_token пустой или не передан"
     headers = HEADERS_CLUBS_LIST.copy()

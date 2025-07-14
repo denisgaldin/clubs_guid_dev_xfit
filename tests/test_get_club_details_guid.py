@@ -1,7 +1,8 @@
 import pytest
 import requests
-import os
 import json
+import os
+import time
 
 BASE_URL = os.getenv("BASE_URL")
 
@@ -18,6 +19,8 @@ CLUB_GUID = "4dba0c90-fd63-40a1-b66c-5cc540d20a25"
 
 
 def test_get_club_details_by_guid(access_token):
+    time.sleep(5)
+
     headers = HEADERS.copy()
     headers["token"] = access_token
 
@@ -27,7 +30,6 @@ def test_get_club_details_by_guid(access_token):
     }
 
     url = f"{BASE_URL}/clubs/{CLUB_GUID}"
-
     response = requests.get(url, headers=headers, params=params)
 
     print("Ответ сервера:", response.status_code)

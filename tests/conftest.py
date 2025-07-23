@@ -20,7 +20,7 @@ HEADERS = {
 }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def sms_token():
     payload = {
         "phone": {
@@ -36,22 +36,20 @@ def sms_token():
 
     if response.status_code == 200:
         token = response.json()["result"]["token"]
-        code = SMS_CODE
-        print(f"Получен token: {token}, используя код: {code}")
-        time.sleep(4)
-        return {"token": token, "code": code}
-
+        print(f"✅ Новый SMS token получен: {token}")
+        time.sleep(3)
+        return {"token": token, "code": SMS_CODE}
     elif response.status_code == 403 and "VERIFICATION_CODE_ALREADY_SEND_PORTAL" in response.text:
-        print("Код уже был отправлен, используем токен из env")
         token = os.getenv("SMS_TOKEN")
         if not token:
             pytest.fail("SMS_TOKEN не задан в .env при уже отправленном коде")
+        print("⚠️ Используется токен из .env (код уже был отправлен)")
         return {"token": token, "code": SMS_CODE}
     else:
-        pytest.fail(f"Не удалось отправить verification code: {response.status_code} {response.text}")
+        pytest.fail(f"❌ Ошибка при получении SMS токена: {response.status_code} {response.text}")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def access_token(sms_token):
     payload = {
         "token": sms_token["token"],
@@ -63,11 +61,15 @@ def access_token(sms_token):
         json=payload
     )
 
+    if response.status_code == 403 and "VERIFICATION_CODE_EXPIRED" in response.text:
+        pytest.fail("❌ Код подтверждения истёк. Обнови его вручную или удали SMS_TOKEN из .env и перезапусти тесты.")
+
     if response.status_code != 200:
-        pytest.fail(f"Ошибка авторизации: {response.status_code} {response.text}")
+        pytest.fail(f"❌ Ошибка авторизации: {response.status_code} {response.text}")
 
     access_token = response.json().get("result", {}).get("access", {}).get("token")
     if not access_token:
-        pytest.fail("Access token отсутствует в ответе")
-    print(f"Получен access_token: {access_token}")
+        pytest.fail("❌ Access token отсутствует в ответе")
+
+    print(f"✅ Access token получен: {access_token[:10]}...")
     return access_token
